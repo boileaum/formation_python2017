@@ -45,8 +45,8 @@ Convolution generale avec une taille de stencil quelconque. Permet de definir to
 """
 def convolve_matrix2(image, convolution_array) :
     height, width= image.shape
-    nx     = convolution_array.shape[1]
-    ny     = convolution_array.shape[0]
+    nx     = convolution_array.shape[0]
+    ny     = convolution_array.shape[1]
     half_x = nx//2
     half_y = ny//2
     out_image = np.zeros((height-nx+1,width-ny+1))
@@ -65,8 +65,8 @@ def convolve_matrix2(image, convolution_array) :
 
 def convolve_matrix3(image, convolution_array) :
     height, width, dim = image.shape
-    nx     = convolution_array.shape[1]
-    ny     = convolution_array.shape[0]
+    nx     = convolution_array.shape[0]
+    ny     = convolution_array.shape[1]
     half_x = nx//2
     half_y = ny//2
     out_image = np.zeros((height-nx+1,width-ny+1, dim))
