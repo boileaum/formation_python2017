@@ -76,6 +76,7 @@ if __name__ == '__main__':
 
     sys.path.append(args.engine)
     import kernels
+    print(kernels.__file__)
 
     img = gimage.gray_image(fileName='data/lena.png')
     img_skel = gimage.gray_image(fileName='data/squelette.png')

@@ -1,12 +1,30 @@
+# distutils: extra_compile_args = -lgomp
+# cython: boundscheck = False
+# cython: wraparound = False
+
 import numpy as np
+from cython.parallel import parallel, prange
+
 """
 Definit une convolution faisant une moyenne des voisins d'un pixel donne
 ( stencil de 3x3 )
 """
-def convolve_mean2(image):
-    height, width = image.shape
-    out_image = np.empty((height-2,width-2))
-    out_image[:, :] = 0.25*(image[:-2,1:-1]+image[2:,1:-1]+image[1:-1,:-2]+image[1:-1,2:])
+def convolve_mean2(double [:, :] image):
+    cdef:
+        int i, j
+        int height = image.shape[0]
+        int width = image.shape[1]
+        double [:, :] vout_image  # On définit une memoryview
+
+    out_image = np.empty((height-2, width-2))
+    vout_image = out_image
+
+#    out_image[:, :] = 0.25*(image[:-2,1:-1] + image[2:,1:-1] +
+#                            image[1:-1,:-2] + image[1:-1,2:])
+    for i in prange(width-2, nogil=True):
+        for j in range(width - 2):
+            vout_image[i, j] = 0.25*(image[i, j+1] + image[i+2, j+1] +
+                                     image[i+1, j] + image[i+1, j+2])
     return out_image
 
 def convolve_mean3(image):
@@ -16,13 +34,23 @@ def convolve_mean3(image):
     return out_image
 
 """
-Definie l'operateur laplacien comme convolution : permet de detecter les bords dans une image
+Definit l'operateur laplacien comme convolution : permet de detecter les bords dans une image
 """
-def convolve_laplacien2(image):
-    height, width = image.shape
-    out_image = np.empty((height-2,width-2))
-    out_image[:, :] = np.abs(4*image[1:-1,1:-1]-image[:-2,1:-1]-image[2:,1:-1]
-                                               -image[1:-1,:-2]-image[1:-1,2:])
+def convolve_laplacien2(double [:, :] image):
+    cdef:
+        int i, j
+        int height = image.shape[0]
+        int width = image.shape[1]
+        double [:, :] vout_image  # On définit une memoryview
+    out_image = np.empty((height-2, width-2))
+    vout_image = out_image
+    for i in range(height - 2):
+        for j in range(width - 2):
+#    out_image[:, :] = np.abs(4*image[1:-1,1:-1]-image[:-2,1:-1]-image[2:,1:-1]
+#                                               -image[1:-1,:-2]-image[1:-1,2:])
+            vout_image[i, j] = abs(4*image[i+1, j+1] - image[i, j+1]
+                                  - image[i+2, j+1] - image[i+1, j]
+                                  - image[i+1, j+2])
     # On renormalise l'image :
     valmax = np.max(out_image)
     valmax = max(1.,valmax)+1.E-9
