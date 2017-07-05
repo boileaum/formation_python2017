@@ -1,6 +1,7 @@
 import abc
 import numpy as np
 
+
 class convolution:
     __metaclass__ = abc.ABCMeta
 
@@ -8,7 +9,7 @@ class convolution:
         if vectorize:
             self.fun = lambda _: 'convolve_' + self.__class__.__name__
         else:
-            self.fun = lambda im: 'convolve_{}{}'.format(self.__class__.__name__, len(im.pixels.shape))
+            self.fun = lambda im: 'convolve_{}'.format(self.__class__.__name__)
 
     @abc.abstractmethod
     def convolve(self, image):
@@ -20,45 +21,51 @@ class convolution:
 
 class mean(convolution):
     """
-    Definie une convolution faisant une moyenne des pixels voisins d'un pixel donne
-    ( stencil de 3x3 )
+    Definit une convolution faisant une moyenne des pixels voisins d'un pixel
+    donne ( stencil de 3x3 )
     """
 
     def convolve(self, image):
         fun = getattr(kernels, self.fun(image))
         return type(image)(from_array=fun(image.pixels))
 
+
 class laplacien(convolution):
     """
-    Definie l'operateur laplacien comme convolution : permet de detecter les bords dans une image
+    Definit l'operateur laplacien comme convolution :
+        permet de detecter les bords dans une image
     """
-    def convolve( self, image ):
+    def convolve(self, image):
         fun = getattr(kernels, self.fun(image))
         return type(image)(from_array=fun(image.pixels))
 
+
 class matrix(convolution):
     """
-    Convolution generale avec une taille de stencil quelconque. Permet de definir tous les stencils que l'on souhaite !
+    Convolution generale avec une taille de stencil quelconque :
+    permet de definir tous les stencils que l'on souhaite !
     """
     def __init__(self, convolution_array, vectorize):
         super(matrix, self).__init__(vectorize)
         self.__convolution_array__ = convolution_array
 
-    def convolve( self, image ) :
+    def convolve(self, image):
         fun = getattr(kernels, self.fun(image))
-        return type(image)(from_array=fun(image.pixels, self.__convolution_array__))
+        return type(image)(from_array=fun(image.pixels,
+                           self.__convolution_array__))
+
 
 def simple_bench(title, function, n):
     from time import time
-    function() # warmup
+    function()  # warmup
     timings = []
     for i in range(n):
         start = time()
         function()
         end = time()
-        timings.append(end -start)
+        timings.append(end - start)
     #print('[{}]: min: {}s, max: {}s, median: {}s, average: {}s'.format(title, min(timings), max(timings), sorted(timings)[n//2], sum(timings)/n))
-    print('[{}]: {}s'.format(title, sorted(timings)[n//2]))
+    print('[{0: <20}]: {1: 1.6f}s'.format(title, sorted(timings)[n//2]))
 
 if __name__ == '__main__':
     import sys
@@ -88,13 +95,15 @@ if __name__ == '__main__':
         output_img = lapl.convolve(img)
         output_img.show()
     else:
-        simple_bench('laplacien/grayscale', lambda: lapl.convolve(img), args.count)
+        simple_bench('laplacien/grayscale',
+                     lambda: lapl.convolve(img), args.count)
 
     if show:
         output_img = lapl.convolve(cimg)
         output_img.show()
     else:
-        simple_bench('laplacien/color', lambda: lapl.convolve(cimg), args.count)
+        simple_bench('laplacien/color',
+                     lambda: lapl.convolve(cimg), args.count)
 
     m = mean(args.vectorize)
     if show:
@@ -104,7 +113,7 @@ if __name__ == '__main__':
         simple_bench('mean/color', lambda: m.convolve(img), args.count)
 
     # Matrice de convolution pour detection de bord amelioree :
-    convol = np.array([[-1,-1,-1],[-1,8,-1],[-1,-1,-1]],np.double)
+    convol = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]], np.double)
     f = matrix(convol, args.vectorize)
     if show:
         output_img = f.convolve(img)
@@ -113,18 +122,21 @@ if __name__ == '__main__':
         simple_bench('border/grayscale', lambda: f.convolve(img), args.count)
 
     # Matrice de convolution pour preciser les contours d'une image ( sharpen )
-    convol = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]],np.double)
+    convol = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]], np.double)
     f = matrix(convol, args.vectorize)
     if show:
         output_img = f.convolve(img_skel)
         output_img.show()
     else:
-        simple_bench('sharpen/grayscale', lambda: f.convolve(img_skel), args.count)
+        simple_bench('sharpen/grayscale',
+                     lambda: f.convolve(img_skel), args.count)
     # Matrice de convolution pour faire du Gaussian blur avec un stencil de 5x5
-    convol = (1./256.)*np.array([[1,4,6,4,1],[4,16,24,16,4],[6,24,36,24,6],[4,16,24,16,4],[1,4,6,4,1]],np.double)
+    convol = (1./256.)*np.array([[1,4,6,4,1], [4,16,24,16,4], [6,24,36,24,6],
+             [4,16,24,16,4], [1,4,6,4,1]], np.double)
     f = matrix(convol, args.vectorize)
     if show:
         output_img = f.convolve(cimg)
         output_img.show()
     else:
-        simple_bench('blur/grayscale', lambda: f.convolve(img_skel), args.count)
+        simple_bench('blur/grayscale',
+                     lambda: f.convolve(img_skel), args.count)

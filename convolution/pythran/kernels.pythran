@@ -1,0 +1,6 @@
+export convolve_mean(float[,])
+export convolve_mean(float[,,])
+export convolve_laplacien(float[,])
+export convolve_laplacien(float[,,])
+export convolve_matrix(float[,], float[,])
+export convolve_matrix(float[,,], float[,])
