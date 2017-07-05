@@ -19,7 +19,7 @@ def convolve_laplacien(image):
                        image[2:, 1:-1] - image[1:-1, :-2] - image[1:-1, 2:])
     # On renormalise l'image :
     valmax = np.max(out_image)
-    valmax = max(1., valmax)+1.E-9
+    valmax = max(1., valmax) + 1.E-9
     out_image *= 1./valmax
     return out_image
 
