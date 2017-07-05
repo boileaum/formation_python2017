@@ -1,0 +1,7 @@
+pythran/kernels.so
+[laplacien/grayscale ]:  0.001014s
+[laplacien/color     ]:  0.038425s
+[mean/color          ]:  0.000396s
+[border/grayscale    ]:  0.003057s
+[sharpen/grayscale   ]:  0.013133s
+[blur/grayscale      ]:  0.016588s
